@@ -13,12 +13,30 @@
     </nav>
 
     <section class="admin-container">
-        <div class="income-dashboard" style="background: #27ae60; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-            <h3>💰 Total Pendapatan (Status: Sudah Diambil)</h3>
+        <div class="income-dashboard">
+            <h3>💰 Pendapatan Hari Ini</h3>
             <h1 id="todayIncome">Rp 0</h1>
+            <hr>
+            <p>📅 Total Bulan Ini: <strong id="monthlyIncome">Rp 0</strong></p>
         </div>
 
-        <hr>
+        <div class="monthly-report">
+            <h4>📊 Riwayat Pendapatan per Bulan</h4>
+            <div class="table-mini">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Bulan</th>
+                            <th style="text-align: right;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monthlyHistoryBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <hr class="divider">
 
         <h2>Input Data Pelanggan Baru</h2>
         <form id="laundryForm" class="admin-form">
@@ -33,7 +51,7 @@
             <button type="submit" class="btn-add">Tambah Data</button>
         </form>
 
-        <hr>
+        <hr class="divider">
 
         <h2>Daftar Kelola Laundry</h2>
         <div class="table-responsive">
@@ -55,7 +73,6 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    
     <script src="script.js"></script>
 </body>
 </html>
