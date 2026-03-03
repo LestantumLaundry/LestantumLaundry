@@ -51,7 +51,15 @@
             <button type="submit" class="btn-add">SIMPAN DATA</button>
         </form>
 
+        <hr class="divider">
+
         <h2>Daftar Kelola Laundry</h2>
+
+        <div class="search-container" style="margin-bottom: 15px;">
+            <input type="text" id="searchInput" onkeyup="filterData()" placeholder="🔍 Cari nama pelanggan..." 
+                   style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; font-size: 14px;">
+        </div>
+
         <div class="table-responsive">
             <table>
                 <thead>
