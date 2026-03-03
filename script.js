@@ -12,15 +12,16 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
-// Fungsi Jitu: Mengambil tanggal hari ini (WIB) tanpa error ISO
+// Fungsi Jitu: Mengambil tanggal hari ini (WIB)
 function getTanggalSekarang() {
     const d = new Date();
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const t = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${t}`; // Hasil: 2026-03-03
+    return `${y}-${m}-${t}`;
 }
 
+// FUNGSI UTAMA: TAMPILKAN DATA
 function displayData() {
     const adminTable = document.getElementById('adminTableBody');
     const incomeDisplay = document.getElementById('todayIncome');
@@ -41,8 +42,8 @@ function displayData() {
         for (let id in data) {
             let item = data[id];
 
+            // Hitung Pendapatan
             if (item.status === "Sudah Diambil" && item.price) {
-                // Gunakan finishDate, jika tidak ada (data lama) pakai ""
                 const itemDate = item.finishDate || ""; 
                 const itemMonth = itemDate.substring(0, 7);
                 const priceNum = parseInt(item.price) || 0;
@@ -55,10 +56,11 @@ function displayData() {
                 }
             }
 
+            // Masukkan ke Tabel Daftar Laundry
             if (adminTable) {
                 adminTable.innerHTML += `
                     <tr>
-                        <td>${item.name}</td>
+                        <td class="cust-name-cell">${item.name}</td>
                         <td>${item.service}</td>
                         <td>Rp ${parseInt(item.price).toLocaleString('id-ID')}</td>
                         <td>
@@ -68,30 +70,52 @@ function displayData() {
                             </select>
                         </td>
                         <td>
-                            <button class="btn-delete" style="background:#e74c3c; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;" onclick="hapusData('${id}')">Hapus</button>
+                            <button class="btn-delete" onclick="hapusData('${id}')">Hapus</button>
                         </td>
                     </tr>`;
             }
         }
 
+        // Update Dashboard Angka
         if (incomeDisplay) incomeDisplay.innerText = "Rp " + dailyTotal.toLocaleString('id-ID');
         if (monthlyDisplay) monthlyDisplay.innerText = "Rp " + monthlyTotal.toLocaleString('id-ID');
 
+        // Update Tabel Riwayat Bulanan
         if (historyTable) {
             historyTable.innerHTML = "";
             const sortedMonths = Object.keys(historyData).sort().reverse();
             sortedMonths.forEach(month => {
                 historyTable.innerHTML += `
                     <tr>
-                        <td style="padding: 10px; color: black !important;">${month}</td>
-                        <td style="padding: 10px; text-align: right; color: black !important;">Rp ${historyData[month].toLocaleString('id-ID')}</td>
+                        <td style="padding: 10px; color: black !important; font-weight: bold;">${month}</td>
+                        <td style="padding: 10px; text-align: right; color: #27ae60 !important; font-weight: bold;">Rp ${historyData[month].toLocaleString('id-ID')}</td>
                     </tr>`;
             });
         }
     });
 }
 
-// Tambah Data
+// FUNGSI PENCARIAN (FILTER)
+window.filterData = function() {
+    const input = document.getElementById('searchInput');
+    const filter = input.value.toLowerCase();
+    const table = document.getElementById('adminTableBody');
+    const tr = table.getElementsByTagName('tr');
+
+    for (let i = 0; i < tr.length; i++) {
+        let tdName = tr[i].getElementsByTagName('td')[0]; // Kolom Nama
+        if (tdName) {
+            let txtValue = tdName.textContent || tdName.innerText;
+            if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    }
+};
+
+// TAMBAH DATA
 const form = document.getElementById('laundryForm');
 if (form) {
     form.addEventListener('submit', (e) => {
@@ -109,7 +133,7 @@ if (form) {
     });
 }
 
-// Update Status
+// UPDATE STATUS
 window.updateStatus = function(id, newStatus) {
     const tgl = getTanggalSekarang();
     let updateData = { status: newStatus };
@@ -117,14 +141,15 @@ window.updateStatus = function(id, newStatus) {
     if (newStatus === "Sudah Diambil") {
         updateData.finishDate = tgl;
     } else {
-        updateData.finishDate = null; // Hapus tanggal jika status dibalikin ke proses
+        updateData.finishDate = null;
     }
-
     database.ref('laundry/' + id).update(updateData);
 };
 
+// HAPUS DATA
 window.hapusData = function(id) {
     if (confirm("Hapus data ini?")) database.ref('laundry/' + id).remove();
 };
 
+// Jalankan fungsi saat halaman dimuat
 displayData();
