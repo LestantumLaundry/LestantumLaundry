@@ -1,4 +1,3 @@
-// Konfigurasi Firebase Anda
 const firebaseConfig = {
   apiKey: "AIzaSyBvdmxh2M-TyZSjLXDHQhxM_2g-tQ3vsVs",
   authDomain: "lestantumlaundry.firebaseapp.com",
@@ -10,47 +9,56 @@ const firebaseConfig = {
   measurementId: "G-365TEGTM4H"
 };
 
-// Inisialisasi Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
-// --- FUNGSI MENAMPILKAN DATA SECARA REAL-TIME ---
+// Fungsi tambahan agar tanggal di HP & Laptop akurat (Lokal Indonesia)
+function getLocalDate() {
+    const d = new Date();
+    const offset = d.getTimezoneOffset() * 60000;
+    const localTime = new Date(d.getTime() - offset);
+    return localTime.toISOString().split('T')[0];
+}
+
 function displayData() {
     const adminTable = document.getElementById('adminTableBody');
-    const customerTable = document.getElementById('customerTableBody');
     const incomeDisplay = document.getElementById('todayIncome');
+    const monthlyDisplay = document.getElementById('monthlyIncome');
+    const historyTable = document.getElementById('monthlyHistoryBody');
 
-    // Mendengarkan perubahan data di Firebase
     database.ref('laundry').on('value', (snapshot) => {
         const data = snapshot.val();
-        let totalIncome = 0;
-        
-        // Bersihkan tabel sebelum update
-        if (customerTable) customerTable.innerHTML = "";
+        let dailyTotal = 0;
+        let monthlyTotal = 0;
+        let historyData = {}; 
+
+        const todayStr = getLocalDate(); // Menggunakan waktu lokal
+        const currentMonthStr = todayStr.substring(0, 7); 
+
         if (adminTable) adminTable.innerHTML = "";
 
         for (let id in data) {
             let item = data[id];
 
-            // 1. Tampilan untuk Halaman Pelanggan (index.html)
-            if (customerTable) {
-                customerTable.innerHTML += `
-                    <tr>
-                        <td>${item.name}</td>
-                        <td style="${item.service === 'Ironing' ? 'color:red; font-weight:bold' : ''}">${item.service}</td>
-                        <td>Rp ${parseInt(item.price).toLocaleString('id-ID')}</td>
-                        <td>${item.drop || '-'}</td>
-                        <td>${item.pick || '-'}</td>
-                    </tr>`;
-            }
-
-            // 2. Tampilan untuk Halaman Admin (admin.html)
-            if (adminTable) {
-                // Kalkulator: Hanya hitung jika status "Sudah Diambil"
-                if (item.status === "Sudah Diambil") {
-                    totalIncome += parseInt(item.price);
+            if (item.status === "Sudah Diambil" && item.price) {
+                const itemDate = item.finishDate || ""; 
+                const itemMonth = itemDate.substring(0, 7);
+                const priceNum = parseInt(item.price);
+                
+                if (itemDate === todayStr) {
+                    dailyTotal += priceNum;
+                }
+                
+                if (itemMonth === currentMonthStr) {
+                    monthlyTotal += priceNum;
                 }
 
+                if (itemMonth) {
+                    historyData[itemMonth] = (historyData[itemMonth] || 0) + priceNum;
+                }
+            }
+
+            if (adminTable) {
                 adminTable.innerHTML += `
                     <tr>
                         <td>${item.name}</td>
@@ -68,44 +76,58 @@ function displayData() {
                     </tr>`;
             }
         }
-        
-        // Update total pendapatan di kotak hijau
-        if (incomeDisplay) {
-            incomeDisplay.innerText = "Rp " + totalIncome.toLocaleString('id-ID');
+
+        if (incomeDisplay) incomeDisplay.innerText = "Rp " + dailyTotal.toLocaleString('id-ID');
+        if (monthlyDisplay) monthlyDisplay.innerText = "Rp " + monthlyTotal.toLocaleString('id-ID');
+
+        if (historyTable) {
+            historyTable.innerHTML = "";
+            const sortedMonths = Object.keys(historyData).sort().reverse();
+            sortedMonths.forEach(month => {
+                historyTable.innerHTML += `
+                    <tr>
+                        <td style="padding: 5px;">${month}</td>
+                        <td style="padding: 5px; text-align: right;">Rp ${historyData[month].toLocaleString('id-ID')}</td>
+                    </tr>`;
+            });
         }
     });
 }
 
-// --- FUNGSI TAMBAH DATA ---
 const form = document.getElementById('laundryForm');
 if (form) {
     form.addEventListener('submit', (e) => {
         e.preventDefault();
-        const newPostKey = database.ref().child('laundry').push().key;
-        database.ref('laundry/' + newPostKey).set({
+        const newKey = database.ref().child('laundry').push().key;
+        database.ref('laundry/' + newKey).set({
             name: document.getElementById('custName').value,
             service: document.getElementById('serviceType').value,
             price: document.getElementById('price').value,
-            drop: document.getElementById('dropDate').value,
-            pick: document.getElementById('pickDate').value,
-            status: "Proses"
+            dropDate: document.getElementById('dropDate').value,
+            pickDate: document.getElementById('pickDate').value,
+            status: "Proses",
+            createdAt: getLocalDate()
         });
         form.reset();
-        alert("Data Berhasil Tersimpan!");
     });
 }
 
-// --- FUNGSI UPDATE STATUS ---
 window.updateStatus = function(id, newStatus) {
-    database.ref('laundry/' + id).update({ status: newStatus });
-};
-
-// --- FUNGSI HAPUS DATA ---
-window.hapusData = function(id) {
-    if (confirm("Hapus data pelanggan ini?")) {
-        database.ref('laundry/' + id).remove();
+    const today = getLocalDate();
+    let updateData = { status: newStatus };
+    
+    if (newStatus === "Sudah Diambil") {
+        updateData.finishDate = today;
+    } else {
+        // Jika status diubah balik ke 'Proses', hapus tanggal finish-nya
+        updateData.finishDate = null;
     }
+
+    database.ref('laundry/' + id).update(updateData);
 };
 
-// Jalankan sistem
+window.hapusData = function(id) {
+    if (confirm("Hapus data ini?")) database.ref('laundry/' + id).remove();
+};
+
 displayData();
