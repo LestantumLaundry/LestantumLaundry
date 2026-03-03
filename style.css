@@ -2,53 +2,83 @@
     --primary-blue: #0056b3;
     --secondary-blue: #007bff;
     --danger-red: #d9534f;
-    --dark-grey: #34495e;
+    --success-green: #27ae60;
+    --bg-light: #f4f7f6;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+body { background-color: var(--bg-light); color: #333; }
 
 /* Navbar */
-.navbar { background: var(--primary-blue); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; color: white; }
-.nav-links { list-style: none; display: flex; gap: 20px; }
-.nav-links a { color: white; text-decoration: none; font-size: 14px; }
-.btn-admin { background: white; color: var(--primary-blue) !important; padding: 5px 10px; border-radius: 4px; font-weight: bold; }
+.navbar { background: var(--primary-blue); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.btn-back { color: white; text-decoration: none; border: 1px solid white; padding: 6px 12px; border-radius: 5px; font-size: 14px; transition: 0.3s; }
+.btn-back:hover { background: white; color: var(--primary-blue); }
+
+/* Container */
+.admin-container { padding: 30px 5%; max-width: 1100px; margin: auto; }
 
 /* Dashboard Pendapatan */
-.income-dashboard { background: #27ae60; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+.income-dashboard { background: var(--success-green); color: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.2); }
+.income-dashboard h3 { font-size: 16px; opacity: 0.9; margin-bottom: 10px; }
+.income-dashboard h1 { font-size: 32px; margin-bottom: 15px; }
+.income-dashboard hr { border: 0; border-top: 1px solid rgba(255,255,255,0.2); margin-bottom: 15px; }
 
-/* PERBAIKAN: Tabel Riwayat Pendapatan Bulanan */
+/* TABEL RIWAYAT BULANAN (YANG DIPERBAIKI) */
 .monthly-report { 
-    background: #ffffff !important; /* Latar belakang Putih */
+    background: #ffffff; 
     padding: 20px; 
-    border-radius: 10px; 
-    margin-bottom: 25px; 
-    border: 1px solid #ddd; 
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 12px; 
+    margin-bottom: 30px; 
+    border: 1px solid #dee2e6; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
-.monthly-report h4 { color: #333; margin-bottom: 10px; }
-.monthly-report table { width: 100%; border-collapse: collapse; min-width: auto; background: white; }
+.monthly-report h4 { color: #2c3e50; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
 
-/* Warna Teks di Tabel Riwayat */
-#monthlyHistoryBody td {
-    color: #000000 !important; /* Teks Hitam Pekat */
-    font-weight: bold;
-    text-align: left;
-    padding: 10px;
-    border-bottom: 1px solid #eee;
+.table-mini { 
+    border: 1px solid #eee; 
+    border-radius: 8px; 
+    overflow: hidden; 
+}
+.table-mini table { width: 100%; border-collapse: collapse; background: white; }
+.table-mini th { 
+    background: #f8f9fa; 
+    color: #666; 
+    text-align: left; 
+    padding: 12px 15px; 
+    font-size: 13px; 
+    text-transform: uppercase;
+    border-bottom: 2px solid #eee;
+}
+.table-mini td { 
+    padding: 15px; 
+    border-bottom: 1px solid #f1f1f1; 
+    color: #000 !important; 
+    font-weight: 600; 
+}
+/* Kolom harga di riwayat jadi hijau & rata kanan */
+.table-mini td:last-child { 
+    text-align: right; 
+    color: var(--success-green) !important; 
 }
 
-/* Tabel Umum & Admin */
-.admin-container { padding: 30px 5%; }
-.table-responsive { overflow-x: auto; margin-top: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-radius: 8px; }
-table { width: 100%; border-collapse: collapse; background: white; }
-th { background: var(--primary-blue); color: white; padding: 15px; }
-td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; color: #333; }
+/* Form & Input */
+h2 { font-size: 18px; color: #2c3e50; margin-bottom: 15px; }
+.admin-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 40px; }
+.admin-form input, .admin-form select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; }
+.admin-form input:focus { border-color: var(--secondary-blue); }
+.btn-add { background: var(--secondary-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+.btn-add:hover { background: var(--primary-blue); }
 
-.admin-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 30px; }
-.admin-form input, .admin-form select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
-.btn-add { background: var(--secondary-blue); color: white; border: none; border-radius: 5px; cursor: pointer; padding: 10px; }
-.btn-delete { background: var(--danger-red); color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; }
+/* Tabel Utama Kelola */
+.table-responsive { background: white; border-radius: 12px; overflow-x: auto; border: 1px solid #dee2e6; }
+table { width: 100%; border-collapse: collapse; }
+th { background: var(--primary-blue); color: white; padding: 15px; font-size: 14px; }
+td { padding: 15px; border-bottom: 1px solid #eee; text-align: center; font-size: 14px; }
+
+.divider { margin: 40px 0; border: 0; border-top: 2px dashed #ddd; }
+.btn-delete { background: var(--danger-red); color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 12px; }
 
 @media (max-width: 768px) {
-    .nav-links { display: none; }
+    .admin-form { grid-template-columns: 1fr; }
 }
