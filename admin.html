@@ -8,26 +8,26 @@
 </head>
 <body class="admin-body">
     <nav class="navbar admin-nav">
-        <div class="logo">ADMIN PANEL</div>
+        <div class="logo"><strong>LESTANTUM</strong> ADMIN</div>
         <a href="index.html" class="btn-back">Lihat Website</a>
     </nav>
 
     <section class="admin-container">
         <div class="income-dashboard">
-            <h3>💰 Pendapatan Hari Ini</h3>
+            <h3>💰 PENDAPATAN HARI INI</h3>
             <h1 id="todayIncome">Rp 0</h1>
             <hr>
             <p>📅 Total Bulan Ini: <strong id="monthlyIncome">Rp 0</strong></p>
         </div>
 
         <div class="monthly-report">
-            <h4>📊 Riwayat Pendapatan per Bulan</h4>
+            <h4>📊 Riwayat Pendapatan Bulanan</h4>
             <div class="table-mini">
                 <table>
                     <thead>
                         <tr>
-                            <th>Bulan</th>
-                            <th style="text-align: right;">Total</th>
+                            <th>Periode</th>
+                            <th style="text-align: right;">Total Omzet</th>
                         </tr>
                     </thead>
                     <tbody id="monthlyHistoryBody">
@@ -38,20 +38,18 @@
 
         <hr class="divider">
 
-        <h2>Input Data Pelanggan Baru</h2>
+        <h2>Tambah Pesanan Baru</h2>
         <form id="laundryForm" class="admin-form">
             <input type="text" id="custName" placeholder="Nama Pelanggan" required>
             <select id="serviceType">
                 <option value="Laundry">Laundry (Cuci)</option>
                 <option value="Ironing">Ironing (Setrika)</option>
             </select>
-            <input type="number" id="price" placeholder="Harga (Contoh: 50000)" required>
-            <input type="text" id="dropDate" placeholder="Tgl Taruh">
-            <input type="text" id="pickDate" placeholder="Tgl Ambil">
-            <button type="submit" class="btn-add">Tambah Data</button>
+            <input type="number" id="price" placeholder="Harga (Rp)" required>
+            <input type="text" id="dropDate" placeholder="Tgl Taruh (DD/MM)">
+            <input type="text" id="pickDate" placeholder="Tgl Ambil (DD/MM)">
+            <button type="submit" class="btn-add">SIMPAN DATA</button>
         </form>
-
-        <hr class="divider">
 
         <h2>Daftar Kelola Laundry</h2>
         <div class="table-responsive">
