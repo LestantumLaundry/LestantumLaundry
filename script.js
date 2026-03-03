@@ -12,12 +12,13 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
-// Fungsi tambahan agar tanggal di HP & Laptop akurat (Lokal Indonesia)
-function getLocalDate() {
+// Fungsi Jitu: Mengambil tanggal hari ini (WIB) tanpa error ISO
+function getTanggalSekarang() {
     const d = new Date();
-    const offset = d.getTimezoneOffset() * 60000;
-    const localTime = new Date(d.getTime() - offset);
-    return localTime.toISOString().split('T')[0];
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const t = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${t}`; // Hasil: 2026-03-03
 }
 
 function displayData() {
@@ -32,7 +33,7 @@ function displayData() {
         let monthlyTotal = 0;
         let historyData = {}; 
 
-        const todayStr = getLocalDate(); // Menggunakan waktu lokal
+        const todayStr = getTanggalSekarang();
         const currentMonthStr = todayStr.substring(0, 7); 
 
         if (adminTable) adminTable.innerHTML = "";
@@ -41,17 +42,13 @@ function displayData() {
             let item = data[id];
 
             if (item.status === "Sudah Diambil" && item.price) {
+                // Gunakan finishDate, jika tidak ada (data lama) pakai ""
                 const itemDate = item.finishDate || ""; 
                 const itemMonth = itemDate.substring(0, 7);
-                const priceNum = parseInt(item.price);
+                const priceNum = parseInt(item.price) || 0;
                 
-                if (itemDate === todayStr) {
-                    dailyTotal += priceNum;
-                }
-                
-                if (itemMonth === currentMonthStr) {
-                    monthlyTotal += priceNum;
-                }
+                if (itemDate === todayStr) dailyTotal += priceNum;
+                if (itemMonth === currentMonthStr) monthlyTotal += priceNum;
 
                 if (itemMonth) {
                     historyData[itemMonth] = (historyData[itemMonth] || 0) + priceNum;
@@ -86,14 +83,15 @@ function displayData() {
             sortedMonths.forEach(month => {
                 historyTable.innerHTML += `
                     <tr>
-                        <td style="padding: 5px;">${month}</td>
-                        <td style="padding: 5px; text-align: right;">Rp ${historyData[month].toLocaleString('id-ID')}</td>
+                        <td style="padding: 10px; color: black !important;">${month}</td>
+                        <td style="padding: 10px; text-align: right; color: black !important;">Rp ${historyData[month].toLocaleString('id-ID')}</td>
                     </tr>`;
             });
         }
     });
 }
 
+// Tambah Data
 const form = document.getElementById('laundryForm');
 if (form) {
     form.addEventListener('submit', (e) => {
@@ -105,22 +103,21 @@ if (form) {
             price: document.getElementById('price').value,
             dropDate: document.getElementById('dropDate').value,
             pickDate: document.getElementById('pickDate').value,
-            status: "Proses",
-            createdAt: getLocalDate()
+            status: "Proses"
         });
         form.reset();
     });
 }
 
+// Update Status
 window.updateStatus = function(id, newStatus) {
-    const today = getLocalDate();
+    const tgl = getTanggalSekarang();
     let updateData = { status: newStatus };
     
     if (newStatus === "Sudah Diambil") {
-        updateData.finishDate = today;
+        updateData.finishDate = tgl;
     } else {
-        // Jika status diubah balik ke 'Proses', hapus tanggal finish-nya
-        updateData.finishDate = null;
+        updateData.finishDate = null; // Hapus tanggal jika status dibalikin ke proses
     }
 
     database.ref('laundry/' + id).update(updateData);
