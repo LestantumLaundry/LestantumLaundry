@@ -9,10 +9,13 @@ const firebaseConfig = {
   measurementId: "G-365TEGTM4H"
 };
 
-firebase.initializeApp(firebaseConfig);
+// Inisialisasi Firebase (Gunakan pengecekan agar tidak double init)
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 const database = firebase.database();
 
-// Fungsi Jitu: Mengambil tanggal hari ini (WIB)
+// Fungsi Jitu: Mengambil tanggal hari ini (Format: YYYY-MM-DD)
 function getTanggalSekarang() {
     const d = new Date();
     const y = d.getFullYear();
@@ -60,7 +63,7 @@ function displayData() {
             if (adminTable) {
                 adminTable.innerHTML += `
                     <tr>
-                        <td class="cust-name-cell">${item.name}</td>
+                        <td class="cust-name-cell" style="font-weight: bold;">${item.name}</td>
                         <td>${item.service}</td>
                         <td>Rp ${parseInt(item.price).toLocaleString('id-ID')}</td>
                         <td>
@@ -76,11 +79,9 @@ function displayData() {
             }
         }
 
-        // Update Dashboard Angka
         if (incomeDisplay) incomeDisplay.innerText = "Rp " + dailyTotal.toLocaleString('id-ID');
         if (monthlyDisplay) monthlyDisplay.innerText = "Rp " + monthlyTotal.toLocaleString('id-ID');
 
-        // Update Tabel Riwayat Bulanan
         if (historyTable) {
             historyTable.innerHTML = "";
             const sortedMonths = Object.keys(historyData).sort().reverse();
@@ -95,7 +96,7 @@ function displayData() {
     });
 }
 
-// FUNGSI PENCARIAN (FILTER)
+// FUNGSI PENCARIAN
 window.filterData = function() {
     const input = document.getElementById('searchInput');
     const filter = input.value.toLowerCase();
@@ -103,19 +104,15 @@ window.filterData = function() {
     const tr = table.getElementsByTagName('tr');
 
     for (let i = 0; i < tr.length; i++) {
-        let tdName = tr[i].getElementsByTagName('td')[0]; // Kolom Nama
+        let tdName = tr[i].getElementsByTagName('td')[0]; 
         if (tdName) {
             let txtValue = tdName.textContent || tdName.innerText;
-            if (txtValue.toLowerCase().indexOf(filter) > -1) {
-                tr[i].style.display = "";
-            } else {
-                tr[i].style.display = "none";
-            }
+            tr[i].style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? "" : "none";
         }
     }
 };
 
-// TAMBAH DATA
+// TAMBAH DATA (Dengan Handling Notifikasi)
 const form = document.getElementById('laundryForm');
 if (form) {
     form.addEventListener('submit', (e) => {
@@ -128,8 +125,12 @@ if (form) {
             dropDate: document.getElementById('dropDate').value,
             pickDate: document.getElementById('pickDate').value,
             status: "Proses"
-        });
-        form.reset();
+        })
+        .then(() => {
+            alert("Data Berhasil Disimpan!");
+            form.reset();
+        })
+        .catch((error) => alert("Gagal Simpan: " + error.message));
     });
 }
 
@@ -137,12 +138,7 @@ if (form) {
 window.updateStatus = function(id, newStatus) {
     const tgl = getTanggalSekarang();
     let updateData = { status: newStatus };
-    
-    if (newStatus === "Sudah Diambil") {
-        updateData.finishDate = tgl;
-    } else {
-        updateData.finishDate = null;
-    }
+    updateData.finishDate = (newStatus === "Sudah Diambil") ? tgl : null;
     database.ref('laundry/' + id).update(updateData);
 };
 
@@ -151,5 +147,4 @@ window.hapusData = function(id) {
     if (confirm("Hapus data ini?")) database.ref('laundry/' + id).remove();
 };
 
-// Jalankan fungsi saat halaman dimuat
 displayData();
